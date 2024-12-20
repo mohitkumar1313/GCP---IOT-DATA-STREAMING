@@ -1,0 +1,32 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka-cluster
+spec:
+  kafka:
+    replicas: 3
+    storage:
+      type: persistent-claim
+      size: 100Gi
+      class: standard  # Adjust based on your GKE storage class
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: external
+        port: 29092
+        type: loadbalancer
+        tls: false
+    config:
+      log.message.format.version: "2.7"
+      inter.broker.listener.name: external
+  zookeeper:
+    replicas: 3
+    storage:
+      type: persistent-claim
+      size: 10Gi
+      class: standard  # Adjust based on your GKE storage class
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

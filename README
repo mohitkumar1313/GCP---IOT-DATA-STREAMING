@@ -1,0 +1,52 @@
+
+1: Set up Kafka using Strimzi Operator on Kubernetes
+## download and update strimzi oeprator manifest
+STRIMZI_VERSION="0.36.0"
+DOWNLOAD_URL=https://github.com/strimzi/strimzi-kafka-operator/releases/download/$STRIMZI_VERSION/strimzi-cluster-operator-$STRIMZI_VERSION.yaml
+curl -L -o strimzi-cluster-operator-$STRIMZI_VERSION.yaml ${DOWNLOAD_URL}
+
+## deploy strimzi cluster operator
+kubectl create -f strimzi-cluster-operator-$STRIMZI_VERSION.yaml
+
+# update namespace from myproject to default
+sed -i 's/namespace: .*/namespace: default/' strimzi-cluster-operator-$STRIMZI_VERSION.yaml
+
+WINDOWS ---START---
+curl -L -o strimzi-cluster-operator-0.36.0.yaml https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.36.0/strimzi-cluster-operator-0.36.0.yaml
+
+powershell -Command "(Get-Content strimzi-cluster-operator-0.36.0.yaml) -replace 'namespace: .+', 'namespace: default' | Set-Content strimzi-cluster-operator-0.36.0.yaml"
+
+kubectl create -f strimzi-cluster-operator-0.36.0.yaml
+
+WINDOWS ---END---
+
+
+kubectl get deploy,rs,po
+
+Then deploy the manifest file for KAFKA and ZOOKEEPER
+Kubectl create -f kafka-cluster-gke.yaml
+
+2: Set up a Kafka UI Tool 
+kubectl apply -f kafka-ui.yaml
+
+3: Deploy mongodb
+kubectl create -f mongodb-secrets.yml
+kubectl create -f mongodb-statefulset.yaml
+kubectl create -f mongodb-service.yml
+
+4: Create a Kafka Producer in Python for Time-Series Data
+Goto https://openweathermap.org/
+Create an account and go to API KEYS and generate keys to use
+
+Following is the link to test api for data
+https://api.openweathermap.org/data/2.5/weather?appid=<YOUR_API_KEY>&q=toronto
+
+
+5: Replace API KEY in producer.py (Currently it working on my api key) and create your own docker image if you want to.
+
+6: Deploy k8s for producer/consumer docker image
+kubectl create -f deployment-prod.yml
+kubectl create -f deployment-consum.yml
+
+
+

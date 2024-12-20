@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: producer-pod
+spec:
+  containers:
+    - name: producer-container
+      image: baljit747/producer-image:latest
