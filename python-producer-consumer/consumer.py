@@ -12,11 +12,13 @@ MONGO_DB = os.getenv('MONGO_DB', 'weather_db')  # MongoDB Database name
 MONGO_COLLECTION = os.getenv('MONGO_COLLECTION', 'weather_data')  # MongoDB Collection name
 
 # Kafka Configuration
+# Kafka Configuration
 consumer_conf = {
-    'bootstrap.servers': 'kafka-cluster-kafka-external-bootstrap:29092',  # Kafka server
+    'bootstrap.servers': os.getenv('KAFKA_BOOTSTRAP_SERVER', 'kafka-cluster-kafka-bootstrap.default.svc.cluster.local:9092'),  # Use env variable or default to internal listener
     'group.id': 'weather-consumer-group',           # Consumer group ID
     'auto.offset.reset': 'earliest'                 # Start reading from the earliest message if no offset is stored
 }
+
 
 # Create Kafka Consumer instance
 consumer = Consumer(consumer_conf)
