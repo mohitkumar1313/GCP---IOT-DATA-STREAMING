@@ -5,7 +5,7 @@ from confluent_kafka import Producer
 
 # OpenWeather API Key and Kafka Configuration
 api_key = '5da0d448b41b9bf704520a7460772814'
-producer_conf = {'bootstrap.servers': 'kafka-cluster-kafka-external-bootstrap:29092'}
+producer_conf = {'bootstrap.servers': 'kafka-cluster-kafka-bootstrap.default.svc.cluster.local:9092'}
 weather_topic = 'current-weather'  # Set your Kafka topic name
 producer = Producer(producer_conf)
 
