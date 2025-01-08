@@ -1,65 +1,22 @@
-name: CD to Kubernetes
+name: Deploy to Kubernetes
 
 on:
   push:
     branches:
-      - master  # Trigger on pushes to the main branch
-  workflow_dispatch:  # Allow manual or programmatic triggering of the workflow
+      - master
 
 jobs:
   deploy:
-    name: Deploy to Kubernetes
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up kubectl with kubeconfig
-      - name: Set up kubectl
+      - name: Set up kubeconfig
         run: |
-          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
-          export KUBECONFIG=$PWD/kubeconfig
+          echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 -d > kube_config
+          export KUBECONFIG=$PWD/kube_config
 
-      # Step 3: Verify Kubernetes cluster connectivity
-      - name: Verify kubectl connectivity
-        run: kubectl get nodes
-
-      # Step 4: Check if Kafka cluster file is updated
-      - name: Check Kafka cluster updates
-        id: kafka-cluster-check
-        run: |
-          if git diff --name-only HEAD^ HEAD | grep -q 'k8s/kafka-cluster-gke.yaml'; then
-            echo "updated=true" >> $GITHUB_ENV
-          else
-            echo "updated=false" >> $GITHUB_ENV
-          fi
-
-      # Step 5: Conditionally deploy Kafka cluster
-      - name: Deploy Kafka cluster
-        if: env.updated == 'true'
-        run: kubectl apply -f k8s/kafka-cluster-gke.yaml
-
-      # Step 6: Check if Kafka UI file is updated
-      - name: Check Kafka UI updates
-        id: kafka-ui-check
-        run: |
-          if git diff --name-only HEAD^ HEAD | grep -q 'k8s/kafka-ui.yaml'; then
-            echo "updated=true" >> $GITHUB_ENV
-          else
-            echo "updated=false" >> $GITHUB_ENV
-          fi
-
-      # Step 7: Conditionally deploy Kafka UI
-      - name: Deploy Kafka UI
-        if: env.updated == 'true'
-        run: kubectl apply -f k8s/kafka-ui.yaml
-
-      # Step 8: Deploy Consumer (always)
-      - name: Deploy Consumer
-        run: kubectl apply -f k8s/deployment-consum.yaml
-
-      # Step 9: Deploy Producer (always)
-      - name: Deploy Producer
-        run: kubectl apply -f k8s/deployment-prod.yaml
+      - name: Test kubectl connection
+        run: kubectl get pods
