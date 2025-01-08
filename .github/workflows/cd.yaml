@@ -1,40 +1,39 @@
-name: Test Cluster Connection
+name: Test Kubernetes Cluster Access
 
 on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
-  test-cluster-connection:
+  test-cluster-access:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Set up Google Cloud CLI
-    - name: Set up Google Cloud CLI
-      uses: google-github-actions/setup-gcloud@v1
-      with:
-        project_id: healthy-pager-444306-e9
+    # Step 1: Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-    # Step 2: Authenticate to GCP
-    - name: Authenticate to GCP
+    # Step 2: Authenticate with Google Cloud
+    - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_KEY }}
 
-    # Step 3: Install gke-gcloud-auth-plugin
-    - name: Install gke-gcloud-auth-plugin
-      run: |
-        gcloud components update --quiet
-        gcloud components install gke-gcloud-auth-plugin --quiet
+    # Step 3: Set up gcloud CLI
+    - name: Set up gcloud CLI
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        install_components: gke-gcloud-auth-plugin
 
-    # Step 4: Decode and configure kubeconfig
-    - name: Configure kubeconfig
+    # Step 4: Decode kubeconfig and set it up
+    - name: Set up kubeconfig
       run: |
-        mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
 
-    # Step 5: Test connection to cluster
-    - name: Test connection
+    # Step 5: Test Kubernetes cluster access
+    - name: Test Kubernetes access
       run: kubectl get nodes
