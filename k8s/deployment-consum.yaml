@@ -2,7 +2,11 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: consumer-pod
+  namespace: consumer  # Consumer namespace
 spec:
   containers:
     - name: consumer-container
-      image: baljit747/consumer-image:latest
+      image: mohitsalgotra/consumer-image:1.0.0
+      env:
+        - name: KAFKA_BOOTSTRAP_SERVER
+          value: "kafka-cluster-kafka-bootstrap.default.svc.cluster.local:9092"  # Internal listener
