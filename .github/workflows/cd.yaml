@@ -26,20 +26,40 @@ jobs:
       - name: Verify kubectl connectivity
         run: kubectl get nodes
 
-      # Step 4: Conditionally deploy Kafka cluster (only if updated)
+      # Step 4: Check if Kafka cluster file is updated
+      - name: Check Kafka cluster updates
+        id: kafka-cluster-check
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q 'k8s/kafka-cluster-gke.yaml'; then
+            echo "updated=true" >> $GITHUB_ENV
+          else
+            echo "updated=false" >> $GITHUB_ENV
+          fi
+
+      # Step 5: Conditionally deploy Kafka cluster
       - name: Deploy Kafka cluster
-        if: ${{ github.event.commits.*.modified.* contains('k8s/kafka-cluster-gke.yaml') }}
+        if: env.updated == 'true'
         run: kubectl apply -f k8s/kafka-cluster-gke.yaml
 
-      # Step 5: Conditionally deploy Kafka UI (only if updated)
+      # Step 6: Check if Kafka UI file is updated
+      - name: Check Kafka UI updates
+        id: kafka-ui-check
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -q 'k8s/kafka-ui.yaml'; then
+            echo "updated=true" >> $GITHUB_ENV
+          else
+            echo "updated=false" >> $GITHUB_ENV
+          fi
+
+      # Step 7: Conditionally deploy Kafka UI
       - name: Deploy Kafka UI
-        if: ${{ github.event.commits.*.modified.* contains('k8s/kafka-ui.yaml') }}
+        if: env.updated == 'true'
         run: kubectl apply -f k8s/kafka-ui.yaml
 
-      # Step 6: Deploy Consumer (always)
+      # Step 8: Deploy Consumer (always)
       - name: Deploy Consumer
         run: kubectl apply -f k8s/deployment-consum.yaml
 
-      # Step 7: Deploy Producer (always)
+      # Step 9: Deploy Producer (always)
       - name: Deploy Producer
         run: kubectl apply -f k8s/deployment-prod.yaml
