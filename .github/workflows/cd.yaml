@@ -3,7 +3,7 @@ name: Deploy to Kubernetes
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
@@ -15,6 +15,7 @@ jobs:
 
       - name: Set up kubeconfig
         run: |
+          mkdir -p $HOME/.kube # Create the .kube directory if it doesn't exist
           echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 -d > $HOME/.kube/config
           export KUBECONFIG=$HOME/.kube/config
 
