@@ -1,4 +1,4 @@
-name: Deploy to GKE
+name: Test Cluster Connection
 
 on:
   push:
@@ -6,31 +6,23 @@ on:
       - master
 
 jobs:
-  deploy:
+  test-cluster-connection:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # Step 1: Set up Google Cloud CLI
+    - name: Set up Google Cloud CLI
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: healthy-pager-444306-e9
+        credentials_json: ${{ secrets.GCP_KEY }}
 
-      - name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
+    # Step 2: Decode and configure kubeconfig
+    - name: Configure kubeconfig
+      run: |
+        echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
 
-      - name: Set Google Cloud project
-        run: gcloud config set project healthy-pager-444306-e9
-
-      - name: Install kubectl and gke-gcloud-auth-plugin
-        run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin kubectl
-
-      - name: Configure kubeconfig
-        run: |
-          echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 -d > $HOME/.kube/config
-          export KUBECONFIG=$HOME/.kube/config
-
-      - name: Test Kubernetes Connection
-        run: kubectl get pods
+    # Step 3: Verify connection to cluster
+    - name: Test connection
+      run: kubectl get nodes
