@@ -18,10 +18,14 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
 
-      - name: Configure Google Cloud project and install dependencies
+      - name: Set Google Cloud project
+        run: gcloud config set project healthy-pager-444306-e9
+
+      - name: Install kubectl and gke-gcloud-auth-plugin
         run: |
-          gcloud config set project healthy-pager-444306-e9
-          gcloud components install gke-gcloud-auth-plugin kubectl -q
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+          sudo apt-get update
+          sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin kubectl
 
       - name: Configure kubeconfig
         run: |
