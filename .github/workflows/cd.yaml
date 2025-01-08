@@ -45,11 +45,11 @@ jobs:
     # Step 6: Deploy Consumer Application
     - name: Deploy Consumer Application
       run: |
-        kubectl apply -f k8s/deployment.consum.yaml
+        kubectl apply -f k8s/deployment-consum.yaml
       
 
     # Step 7: Deploy Producer Application
     - name: Deploy Producer Application
       run: |
-        kubectl apply -f k8s/deployment.prod.yaml
+        kubectl apply -f k8s/deployment-prod.yaml
         
