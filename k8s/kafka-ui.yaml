@@ -1,10 +1,10 @@
-# manifests/kafka-ui.yaml
 apiVersion: v1
 kind: Service
 metadata:
   labels:
     app: kafka-ui
   name: kafka-ui
+  namespace: default  # Ensure it deploys in the default namespace
 spec:
   type: LoadBalancer
   ports:
@@ -19,6 +19,7 @@ metadata:
   labels:
     app: kafka-ui
   name: kafka-ui
+  namespace: default  # Ensure it deploys in the default namespace
 spec:
   replicas: 1
   selector:
@@ -36,9 +37,8 @@ spec:
             - containerPort: 8080
           env:
             - name: KAFKA_CLUSTERS_0_NAME
-              value: demo-cluster
+              value: demo-cluster  # Logical name for your Kafka cluster
             - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
-              value: kafka-cluster-kafka-bootstrap:9092
+              value: kafka-cluster-kafka-bootstrap.default.svc.cluster.local:9092  # Use the full service address
             - name: KAFKA_CLUSTERS_0_ZOOKEEPER
-              value: kafka-cluster-zookeeper-client:2181
-          resources: {}
+              value: kafka-cluster-zookeeper-client.default.svc.cluster.local:2181  # Full Zookeeper addres
