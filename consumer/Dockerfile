@@ -5,7 +5,11 @@ FROM python:3.13.0-slim
 WORKDIR /app
 
 # Copy the current directory contents into the container at /app
-COPY . /app
+# Copy the application code
+COPY ./consumer /app
+
+# Copy the requirements file explicitly
+COPY ./consumer/requirements.txt /app/requirements.txt
 
 # Upgrade pip to the latest version
 RUN pip install --no-cache-dir --upgrade pip
