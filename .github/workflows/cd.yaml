@@ -15,14 +15,19 @@ jobs:
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: healthy-pager-444306-e9
+
+    # Step 2: Authenticate to GCP
+    - name: Authenticate to GCP
+      uses: google-github-actions/auth@v1
+      with:
         credentials_json: ${{ secrets.GCP_KEY }}
 
-    # Step 2: Decode and configure kubeconfig
+    # Step 3: Decode and configure kubeconfig
     - name: Configure kubeconfig
       run: |
         echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
 
-    # Step 3: Verify connection to cluster
+    # Step 4: Test connection to cluster
     - name: Test connection
       run: kubectl get nodes
