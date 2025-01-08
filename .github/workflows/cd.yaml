@@ -1,4 +1,4 @@
-name: Deploy to Kubernetes
+name: Deploy to GKE
 
 on:
   push:
@@ -13,18 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Add Google Cloud SDK repository and public key
-        run: |
-          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-          curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCLOUD_SERVICE_KEY }}
 
-      - name: Decode kubeconfig and configure kubectl
+      - name: Configure Google Cloud project and install dependencies
         run: |
-          mkdir -p $HOME/.kube
+          gcloud config set project healthy-pager-444306-e9
+          gcloud components install gke-gcloud-auth-plugin kubectl -q
+
+      - name: Configure kubeconfig
+        run: |
           echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 -d > $HOME/.kube/config
           export KUBECONFIG=$HOME/.kube/config
 
-      - name: Test kubectl connection
+      - name: Test Kubernetes Connection
         run: kubectl get pods
