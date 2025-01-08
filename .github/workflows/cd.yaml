@@ -1,0 +1,44 @@
+name: CD to Kubernetes
+
+on:
+  push:
+    branches:
+      - master  # Trigger on pushes to the main branch
+
+jobs:
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up kubectl with kubeconfig
+      - name: Set up kubectl
+        run: |
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > kubeconfig
+          export KUBECONFIG=$PWD/kubeconfig
+
+      # Step 3: Verify Kubernetes cluster connectivity
+      - name: Verify kubectl connectivity
+        run: kubectl get nodes
+
+      # Step 4: Conditionally deploy Kafka cluster (only if updated)
+      - name: Deploy Kafka cluster
+        if: ${{ github.event.commits.*.modified.* contains('k8s/kafka-cluster-gke.yaml') }}
+        run: kubectl apply -f k8s/kafka-cluster-gke.yaml
+
+      # Step 5: Conditionally deploy Kafka UI (only if updated)
+      - name: Deploy Kafka UI
+        if: ${{ github.event.commits.*.modified.* contains('k8s/kafka-ui.yaml') }}
+        run: kubectl apply -f k8s/kafka-ui.yaml
+
+      # Step 6: Deploy Consumer (always)
+      - name: Deploy Consumer
+        run: kubectl apply -f k8s/deployment-consum.yaml
+
+      # Step 7: Deploy Producer (always)
+      - name: Deploy Producer
+        run: kubectl apply -f k8s/deployment-prod.yaml
