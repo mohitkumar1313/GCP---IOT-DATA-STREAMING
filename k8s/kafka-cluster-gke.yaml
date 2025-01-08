@@ -2,6 +2,7 @@ apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
   name: kafka-cluster
+  namespace: default  
 spec:
   kafka:
     replicas: 3
@@ -18,9 +19,6 @@ spec:
         port: 29092
         type: loadbalancer
         tls: false
-    config:
-      log.message.format.version: "2.7"
-      inter.broker.listener.name: external
   zookeeper:
     replicas: 3
     storage:
