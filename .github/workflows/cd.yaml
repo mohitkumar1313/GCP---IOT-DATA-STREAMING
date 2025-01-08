@@ -22,13 +22,20 @@ jobs:
       with:
         credentials_json: ${{ secrets.GCP_KEY }}
 
-    # Step 3: Decode and configure kubeconfig
+    # Step 3: Install gke-gcloud-auth-plugin
+    - name: Install gke-gcloud-auth-plugin
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+        gcloud components install gke-gcloud-auth-plugin --quiet
+
+    # Step 4: Decode and configure kubeconfig
     - name: Configure kubeconfig
       run: |
         mkdir -p $HOME/.kube
         echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 --decode > $HOME/.kube/config
         chmod 600 $HOME/.kube/config
 
-    # Step 4: Test connection to cluster
+    # Step 5: Test connection to cluster
     - name: Test connection
       run: kubectl get nodes
